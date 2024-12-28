@@ -1,0 +1,82 @@
+/* Ostatak koda je isti kao prije */
+
+.result-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+  
+  .result-item.selected {
+    background-color: #d4edda; /* Svijetlo zelena za odabranu pjesmu */
+    border-color: #28a745;
+  }
+  
+  .result-item img {
+    width: 60px;
+    height: 45px;
+    border-radius: 5px;
+  }
+  
+  .song-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+  
+  .song-info p {
+    margin: 0;
+    font-weight: bold;
+  }
+  
+  .song-info button {
+    padding: 5px 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .song-info button:hover {
+    background-color: #0056b3;
+  }
+  
+  .send-button {
+    width: 100%;
+    background-color: #28a745;
+  }
+  
+  .send-button:hover {
+    background-color: #218838;
+  }
+  
+  .pay-button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin-right: 10px;
+  }
+  
+  .pay-button:hover {
+    background-color: #218838;
+  }
+  
+  .cancel-button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  
+  .cancel-button:hover {
+    background-color: #c82333;
+  }
+  
