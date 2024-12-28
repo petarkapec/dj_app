@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react"; 
 import { Navigate } from "react-router-dom";
 import axios from "axios";
 
 interface Request {
   id: number;
   donation: string;
-  song?: { title: string; videoId: string }; // Polje song je sada opcionalno
+  song?: { title: string; videoId: string }; // Polje song ostaje isto
   comment: string;
   status: string;
 }
@@ -29,13 +29,13 @@ const DJConsole = () => {
     try {
       const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/requests`);
       setRequests(res.data);
-      console.log(res.data);
+      console.log("Dohvaćeni zahtjevi:", res.data);
     } catch (error) {
       console.error("Greška kod dohvaćanja zahtjeva:", error);
     }
   };
 
-  // Prihvati zahtjev i pošalji signal korisničkom frontend-u
+  // Prihvati zahtjev
   const acceptRequest = async (id: number) => {
     try {
       await axios.post(`${import.meta.env.VITE_BACKEND_URL}/accept-request`, { id });
@@ -55,9 +55,7 @@ const DJConsole = () => {
     }
   };
 
-
-
-  // WebSocket konekcija
+  // WebSocket konekcija za real-time ažuriranja
   useEffect(() => {
     const socket = new WebSocket("ws://localhost:3001");
 
@@ -69,12 +67,29 @@ const DJConsole = () => {
       const data = JSON.parse(event.data);
       console.log("Primljena poruka putem WebSocket-a:", data);
 
-      // Ažuriraj status zahtjeva
-      setRequests((prevRequests) =>
-        prevRequests.map((r) =>
-          r.id === data.id ? { ...r, status: data.status } : r
-        )
-      );
+      // Ažuriraj listu zahtjeva prema dolaznim podacima
+      setRequests((prevRequests) => {
+        const existingRequest = prevRequests.find((r) => r.id === data.id);
+      
+        if (existingRequest) {
+          // Ažuriraj postojeći zahtjev i spoji podatke
+          return prevRequests.map((r) =>
+            r.id === data.id
+              ? {
+                  ...r,
+                  ...data, // Spoji nove podatke iz `data` s postojećima
+                }
+              : r
+          );
+        } else {
+          // Dodaj novi zahtjev s podrazumijevanim vrijednostima
+          fetchRequests();
+          return [
+            ...prevRequests
+          ];
+        }
+      });
+      
     };
 
     socket.onclose = () => {
@@ -92,9 +107,16 @@ const DJConsole = () => {
     <div>
       <h1>DJ Zahtjevi</h1>
       {requests.map((r) => (
-        <div key={r.id} style={{ marginBottom: "1rem", border: "1px solid #ccc", padding: "1rem" }}>
+        <div
+          key={r.id}
+          style={{
+            marginBottom: "1rem",
+            border: "1px solid #ccc",
+            padding: "1rem",
+          }}
+        >
           <p>
-          <b>Pjesma:</b> {r.song_title ? r.song_title : "Nepoznata"} | <b>Donacija:</b> {r.donation}€
+            <b>Pjesma:</b> {r.song_title || "Nepoznata"} | <b>Donacija:</b> {r.donation}€
           </p>
           <p>
             <b>Komentar:</b> {r.comment}

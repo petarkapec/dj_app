@@ -255,7 +255,16 @@ app.post("/request", async (req, res) => {
       request.id,
     ]);
 
+
+
     res.status(200).json({ message: "Request created", id: request.id, paymentUrl: session.url });
+    
+    // Obavijestite DJ klijente
+    notifyDJClients({
+      id: parseInt(request.id),
+      status: "pending",
+    });
+
   } catch (error) {
     console.error("Error creating payment session:", error);
     res.status(500).json({ message: "Error creating request" });

@@ -53,6 +53,7 @@ const UserPage: React.FC = () => {
       const data = JSON.parse(event.data);
 
       // Ažuriranje statusa zahtjeva u stvarnom vremenu
+      fetchUserRequests();
       if (data.type === "status_update" && data.clientId === clientId) {
         setUserRequests((prevRequests) =>
           prevRequests.map((req) =>
