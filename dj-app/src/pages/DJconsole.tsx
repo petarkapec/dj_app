@@ -90,7 +90,10 @@ const DJConsole = () => {
 
   return (
     <div className="dj-console">
-      <h1 className="title">DJ Requests</h1>
+      <h1 className="title">
+        <img src="public/feta-logo.jpg" alt="FETA Logo" className="title-icon" />
+          FETA
+      </h1>
       {requests.map((r) => (
         <div className="request-card" key={r.id}>
           <div>
@@ -123,7 +126,7 @@ const DJConsole = () => {
                 </>
               )}
               {r.status === "awaiting_payment" && (
-                <span className="loader"> payment</span>
+                <span className="status-awaiting">Awaiting payment</span>
               )}
             </div>
           )}
