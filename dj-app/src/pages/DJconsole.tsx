@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from "react"; 
+import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import axios from "axios";
+import "./DJconsole.css";
+import YouTubeThumbnail from "./YouTubeThumbnail";
+
 
 interface Request {
   id: number;
   donation: string;
-  song?: { title: string; videoId: string }; // Polje song ostaje isto
+  song?: { title: string; videoId: string };
   comment: string;
   status: string;
 }
@@ -24,76 +27,58 @@ const DJConsole = () => {
 
   const [requests, setRequests] = useState<Request[]>([]);
 
-  // Dohvaćanje zahtjeva
   const fetchRequests = async () => {
     try {
       const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/requests`);
       setRequests(res.data);
-      console.log("Dohvaćeni zahtjevi:", res.data);
     } catch (error) {
-      console.error("Greška kod dohvaćanja zahtjeva:", error);
+      console.error("Error fetching requests:", error);
     }
   };
 
-  // Prihvati zahtjev
   const acceptRequest = async (id: number) => {
     try {
       await axios.post(`${import.meta.env.VITE_BACKEND_URL}/accept-request`, { id });
-      fetchRequests(); // Osvježi listu zahtjeva
+      fetchRequests();
     } catch (error) {
-      console.error("Greška kod prihvaćanja zahtjeva:", error);
+      console.error("Error accepting request:", error);
     }
   };
 
-  // Odbij zahtjev
   const rejectRequest = async (id: number) => {
     try {
       await axios.post(`${import.meta.env.VITE_BACKEND_URL}/reject-request`, { id });
-      fetchRequests(); // Osvježi listu zahtjeva
+      fetchRequests();
     } catch (error) {
-      console.error("Greška kod odbijanja zahtjeva:", error);
+      console.error("Error rejecting request:", error);
     }
   };
 
-  // WebSocket konekcija za real-time ažuriranja
   useEffect(() => {
     const socket = new WebSocket("ws://localhost:3001");
 
     socket.onopen = () => {
-      console.log("Povezani na WebSocket server");
+      console.log("Connected to WebSocket server");
     };
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      console.log("Primljena poruka putem WebSocket-a:", data);
-
-      // Ažuriraj listu zahtjeva prema dolaznim podacima
       setRequests((prevRequests) => {
         const existingRequest = prevRequests.find((r) => r.id === data.id);
-      
+
         if (existingRequest) {
-          // Ažuriraj postojeći zahtjev i spoji podatke
           return prevRequests.map((r) =>
-            r.id === data.id
-              ? {
-                  ...r,
-                  ...data, // Spoji nove podatke iz `data` s postojećima
-                }
-              : r
+            r.id === data.id ? { ...r, ...data } : r
           );
         } else {
-          // Dodaj novi zahtjev s podrazumijevanim vrijednostima
           fetchRequests();
-          return [
-            ...prevRequests
-          ];
+          return [...prevRequests];
         }
       });
-      
     };
 
     socket.onclose = () => {
-      console.log("WebSocket konekcija zatvorena");
+      console.log("WebSocket connection closed");
     };
 
     return () => socket.close();
@@ -104,44 +89,50 @@ const DJConsole = () => {
   }, []);
 
   return (
-    <div>
-      <h1>DJ Zahtjevi</h1>
+    <div className="dj-console">
+      <h1 className="title">DJ Requests</h1>
       {requests.map((r) => (
-        <div
-          key={r.id}
-          style={{
-            marginBottom: "1rem",
-            border: "1px solid #ccc",
-            padding: "1rem",
-          }}
-        >
+        <div className="request-card" key={r.id}>
+          <div>
+            <YouTubeThumbnail songVideoId={r.song_video_id} />
+          </div>
           <p>
-            <b>Pjesma:</b> {r.song_title || "Nepoznata"} | <b>Donacija:</b> {r.donation}€
+            <b>Song:</b> {r.song_title || "Unknown"} | <b>Donation:</b> {r.donation}€
           </p>
           <p>
-            <b>Komentar:</b> {r.comment}
+            <b>Comment:</b> {r.comment}
           </p>
           {r.status === "paid" ? (
-            <span style={{ color: "green" }}>Plaćeno ✅</span>
+            <span className="status-paid">Paid ✅</span>
           ) : (
             <div>
               {r.status === "pending" && (
                 <>
-                  <button onClick={() => acceptRequest(r.id)}>Prihvati</button>
-                  <button onClick={() => rejectRequest(r.id)}>Odbij</button>
+                  <button
+                    className="btn btn-accept"
+                    onClick={() => acceptRequest(r.id)}
+                  >
+                    Accept
+                  </button>
+                  <button
+                    className="btn btn-reject"
+                    onClick={() => rejectRequest(r.id)}
+                  >
+                    Reject
+                  </button>
                 </>
               )}
               {r.status === "awaiting_payment" && (
-                <span style={{ color: "orange" }}>
-                  Čeka se potvrda plaćanja od kupca ⏳
-                </span>
+                <span className="loader"> payment</span>
               )}
             </div>
           )}
         </div>
       ))}
-      <div>
-        <button onClick={handleLogout}>Logout</button>
+      <div className="logout-container">
+        <button className="btn btn-logout" onClick={handleLogout}>
+          Logout
+        </button>
       </div>
     </div>
   );

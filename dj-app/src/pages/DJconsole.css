@@ -1,0 +1,312 @@
+/* Global Styles */
+body {
+    margin: 0;
+    font-family: "Orbitron", sans-serif;
+    background-color: #121212; /* Tamna pozadina */
+    color: #e0e0e0; /* Lagano siva boja za tekst */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+  
+  /* DJ Console Container */
+  .dj-console {
+    width: 100%;
+    max-width: 400px; /* Limitiraj širinu za mobilne uređaje */
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .centered {
+    text-align: center;
+  }
+  
+  /* Title */
+  .title {
+    color: #00aaff; /* Intenzivno plava za naslov */
+    margin-bottom: 20px;
+    font-size: 1.8rem; /* Prilagođena veličina za mobilne uređaje */
+    text-align: center;
+  }
+  
+  /* Request Card Styles */
+  .request-card {
+    background: #1e1e1e; /* Tamnosiva za kartice */
+    border: 1px solid #00aaff; /* Plavi okvir */
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    width: 100%; /* Kartica zauzima širinu roditeljskog kontejnera */
+  }
+  
+  .request-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.8);
+  }
+  
+  .request-card p {
+    margin: 10px 0;
+    color: #b3b3b3;
+  }
+  
+  .request-card b {
+    display: block;
+  }
+  
+  .request-card .donation {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #00e6ff;
+    margin-top: 5px;
+  }
+  
+  /* Status Styles */
+  .status-paid {
+    color: #2ae98f;
+    font-weight: bold;
+  }
+  
+  .status-awaiting {
+    color: #ffaa00;
+  }
+  
+  /* General Button Styles */
+/* General Button Styling */
+button {
+    padding: 1em 2em;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    color: #000000;
+    transition: all 1000ms;
+    font-size: 15px;
+    position: relative;
+    overflow: hidden;
+    outline: 2px solid #ffffff;
+  }
+  
+  button:hover {
+    color: #ffffff;
+    transform: scale(1.1);
+    outline: 2px solid #ffffff;
+    box-shadow: 4px 5px 17px -4px #ffffff;
+  }
+  
+  button::before {
+    content: "";
+    position: absolute;
+    left: -50px;
+    top: 0;
+    width: 0;
+    height: 100%;
+    background-color: #dee1e1;
+    transform: skewX(45deg);
+    z-index: -1;
+    transition: width 1000ms;
+  }
+  
+  button:hover::before {
+    width: 250%;
+  }
+  
+  /* Accept Button */
+  .btn-accept {
+    outline-color: #2ae98f;
+  }
+  
+  .btn-accept::before {
+    background-color: #2ae98f;
+  }
+  
+  .btn-accept:hover {
+    outline-color: #24c97b;
+    box-shadow: 4px 5px 17px -4px #24c97b;
+  }
+  
+  /* Reject Button */
+  .btn-reject {
+    outline-color: #e63946;
+  }
+  
+  .btn-reject::before {
+    background-color: #e63946;
+  }
+  
+  .btn-reject:hover {
+    outline-color: #c52b37;
+    box-shadow: 4px 5px 17px -4px #c52b37;
+  }
+  
+  /* Logout Button */
+  .btn-logout {
+    outline-color: #e0e0e0;
+  }
+  
+  .btn-logout::before {
+    background-color: #00aaff;
+  }
+  
+  .btn-logout:hover {
+    outline-color: #0088cc;
+    box-shadow: 4px 5px 17px -4px #0088cc;
+  }
+  
+  /* Centered Content */
+  .centered {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: #121212;
+    color: #ffffff;
+  }
+  
+  /* Title Styling */
+  .title {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    color: #70bdca;
+  }
+  
+  /* Request Card Styling */
+  .request-card {
+    background-color: #1e1e1e;
+    border: 1px solid #2c2c2c;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+  }
+  
+  .request-card p {
+    margin: 0.5rem 0;
+  }
+  
+  .status-paid {
+    color: #2ae98f;
+    font-weight: bold;
+  }
+  
+  .status-awaiting {
+    color: #e6a239;
+    font-weight: bold;
+  }
+  
+  /* Logout Container Styling */
+  .logout-container {
+    margin-top: 2rem;
+  }
+  
+
+  /* Logout Container */
+  .logout-container {
+    margin-top: 20px;
+  }
+
+
+  /* loaders */
+  /* HTML: <div class="loader"></div> */
+.loader {
+    width: fit-content;
+    font-size: 40px;
+    font-family: system-ui,sans-serif;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #f8e51b8c;
+    -webkit-text-stroke: 1px #ffffff;
+    background:
+      radial-gradient(0.71em at 50% 1em,#ffffff 99%,#99999900 101%) calc(50% - 1em) 1em/2em 200% repeat-x text,
+      radial-gradient(0.71em at 50% -0.5em,#ffffff00 99%,#ffffff 101%) 50% 1.5em/2em 200% repeat-x text;
+    animation: 
+      l10-0 .8s linear infinite alternate,
+      l10-1  4s linear infinite;
+  }
+  .loader:before {
+    content: "Awaiting";
+  }
+  @keyframes l10-0 {
+    to {background-position-x: 50%,calc(50% + 1em)}
+  }
+  @keyframes l10-1 {
+    to {background-position-y: -.5em,0}
+  }
+  
+
+  /* Adjusting the first request card size and proximity */
+.request-card:first-child {
+    width: 100%; /* Full width */
+    max-width: 600px; /* Larger size */
+    transform: translateY(0); /* Start at 0 position */
+  }
+  
+  /* Entrance Animation for newly created request cards */
+  .request-card-enter {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+  
+  /* Exit Animation for deleted request cards */
+  .request-card-exit {
+    animation: fadeOut 0.5s ease-in-out;
+  }
+  
+  /* Animations */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+  }
+  
+  /* Additional hover effect and transitions for consistency */
+  .request-card {
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  }
+  
+  .request-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.7);
+  }
+  
+  /* Media Queries */
+  @media screen and (max-width: 480px) {
+    .title {
+      font-size: 1.5rem;
+    }
+  
+    .btn {
+      font-size: 0.8rem;
+      padding: 8px 12px;
+    }
+  
+    .request-card .donation {
+      font-size: 1.3rem;
+    }
+  }
+  

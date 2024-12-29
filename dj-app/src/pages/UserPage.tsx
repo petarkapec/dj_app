@@ -84,7 +84,7 @@ const UserPage: React.FC = () => {
   // Pretraživanje YouTube pjesama
   const searchYouTube = async () => {
     if (!songQuery) return;
-
+  
     try {
       const response = await axios.get(`https://www.googleapis.com/youtube/v3/search`, {
         params: {
@@ -92,16 +92,20 @@ const UserPage: React.FC = () => {
           maxResults: 5,
           q: songQuery,
           type: "video",
+          videoCategoryId: 10, // Glazba
+          videoDuration: "medium", // Isključivanje Shorts formata
           key: YOUTUBE_API_KEY,
         },
       });
-
+  
       setSearchResults(response.data.items); // Postavi rezultate pretraživanja
       setSelectedSong(null); // Resetiraj prethodno odabranu pjesmu
     } catch (error) {
       console.error("Greška kod pretraživanja YouTube API-ja:", error);
     }
   };
+  
+  
 
   const cancelRequest = async (requestId: string) => {
     try {
@@ -224,18 +228,6 @@ const UserPage: React.FC = () => {
           onChange={(e) => setComment(e.target.value)}
           placeholder="Poruka DJ-u"
         />
-      </div>
-
-      {/* Status i gumbovi */}
-      <div className="status-messages">
-        {status === "loading" && <p>Loading...</p>}
-        {status === "submitted" && !paymentUrl && <p>Request submitted. Waiting for approval...</p>}
-        {status === "submitted" && paymentUrl && (
-          <button className="send-button" onClick={() => window.open(paymentUrl, "_blank")}>
-            Plati
-          </button>
-        )}
-        {status === "error" && <p>There was an error. Try again later.</p>}
       </div>
 
       <button className="send-button" onClick={handleSubmit}>
