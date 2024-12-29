@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./UserPage.css";
-
+import { useNavigate } from "react-router-dom";
 const YOUTUBE_API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 const wsUrl = import.meta.env.VITE_WS_URL; // URL za WebSocket (npr. ws://localhost:3001)
@@ -16,12 +16,35 @@ const UserPage: React.FC = () => {
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null); // Stripe URL
   const [userRequests, setUserRequests] = useState<any[]>([]); // Povijest zahtjeva
   const clientId = localStorage.getItem("clientId") || generateClientId();
+  const navigate = useNavigate();
 
   // Generiraj i spremi jedinstveni identifikator
   function generateClientId() {
     const newClientId = `client_${Math.random().toString(36).substring(2, 15)}`;
     localStorage.setItem("clientId", newClientId);
     return newClientId;
+  }
+
+  const fetchUserIds = async () => {
+    if (!clientId) {
+      console.error("clientId nije definisan!");
+      return [];
+    }
+    try {
+      const response = await axios.get(`${backendUrl}/user-ids`, {
+        params: { clientId },
+      });
+      console.log(response);
+      const usedIds = response.data.map((item) => item.id);
+
+      console.log("Iskorišteni ID-evi:", usedIds);
+      return usedIds;
+    
+    } catch (error) {
+      console.error("Greška kod dohvaćanja zahtjeva:", error);
+      return [];
+    }
+
   }
 
   // Dohvati povijest zahtjeva
@@ -64,6 +87,10 @@ const UserPage: React.FC = () => {
         // Ako je korisnik trenutno čeka Stripe URL, ažuriraj ga
         if (data.status === "awaiting_payment" && data.paymentUrl) {
           setPaymentUrl(data.paymentUrl);
+        }
+
+        if (data.status === "rejected" && data.paymentUrl) {
+          alert("DJ je izbrisao tvoj zahtjev");
         }
       }
     };
@@ -138,6 +165,14 @@ const UserPage: React.FC = () => {
       alert("Molimo unesite donaciju i odaberite pjesmu!");
       return;
     }
+
+    let userids = await fetchUserIds();
+
+    userids.sort((a, b) => b - a);
+    let noviId = userids[0] + 1;
+    while (noviId in userids) {
+      noviId++;
+    }
   
     const requestData = {
       clientId,
@@ -146,7 +181,8 @@ const UserPage: React.FC = () => {
         title: selectedSong.snippet.title,
         videoId: selectedSong.id.videoId,
       },
-      comment
+      comment,
+      noviId
     };
   
     try {
@@ -157,6 +193,8 @@ const UserPage: React.FC = () => {
         setStatus("submitted");
         setPaymentUrl(response.data.paymentUrl); // Postavi payment URL
         fetchUserRequests(); // Osvježi listu zahtjeva
+        navigate(`/requests/${noviId}`)
+        
       } else {
         throw new Error("Zahtjev nije uspješno poslan");
       }
@@ -164,6 +202,7 @@ const UserPage: React.FC = () => {
       console.error("Greška:", error);
       setStatus("error");
     }
+    
   };
   
 
@@ -174,6 +213,7 @@ const UserPage: React.FC = () => {
   return (
     <div className="container">
       <h1>Pošalji zahtjev DJ-u</h1>
+      <button onClick={fetchUserIds}>test</button>
 
       {/* Polje za donaciju */}
       <div className="form-group">
@@ -247,6 +287,7 @@ const UserPage: React.FC = () => {
             </p>
             {/* Gumbi za akcije */}
             <div className="request-actions">
+              <button onClick={() => navigate(`/requests/${r.id}`)}>Detalji</button>
                 {r.status === "awaiting_payment" && (
                 <button
                     className="pay-button"

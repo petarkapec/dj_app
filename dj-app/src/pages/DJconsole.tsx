@@ -11,6 +11,7 @@ interface Request {
   song?: { title: string; videoId: string };
   comment: string;
   status: string;
+  clientId: string;
 }
 
 const handleLogout = () => {
@@ -54,6 +55,16 @@ const DJConsole = () => {
     }
   };
 
+  const cancelRequest = async (id: number) => {
+    try {
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/reject-request`, { id });
+      fetchRequests();
+    } catch (error) {
+      console.error("Error rejecting request:", error);
+    }
+  };
+  
+
   useEffect(() => {
     const socket = new WebSocket("ws://localhost:3001");
 
@@ -96,6 +107,12 @@ const DJConsole = () => {
           <div>
             <YouTubeThumbnail songVideoId={r.song_video_id} />
           </div>
+          <button
+                    className="btn btn-reject"
+                    onClick={() => cancelRequest(r.id)}
+                  >
+                    Prekini
+                  </button>
           <p>
             <b>Song:</b> {r.song_title || "Unknown"} | <b>Donation:</b> {r.donation}€
           </p>
