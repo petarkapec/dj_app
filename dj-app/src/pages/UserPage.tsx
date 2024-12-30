@@ -17,7 +17,7 @@ const UserPage: React.FC = () => {
   const [userRequests, setUserRequests] = useState<any[]>([]);
   const clientId = localStorage.getItem("clientId") || generateClientId();
   const navigate = useNavigate();
-  const navigate = useNavigate();
+  
 
   function generateClientId() {
     const newClientId = `client_${Math.random().toString(36).substring(2, 15)}`;
@@ -47,43 +47,7 @@ const UserPage: React.FC = () => {
 
   }
 
-  const fetchUserIds = async () => {
-    if (!clientId) {
-      console.error("clientId nije definisan!");
-      return [];
-    }
-    try {
-      const response = await axios.get(`${backendUrl}/user-ids`, {
-        params: { clientId },
-      });
-      console.log(response);
-      const usedIds = response.data.map((item) => item.id);
 
-      console.log("Iskorišteni ID-evi:", usedIds);
-      return usedIds;
-    
-    } catch (error) {
-      console.error("Greška kod dohvaćanja zahtjeva:", error);
-      return [];
-    }
-
-  }
-
-  const fetchUserIds = async () => {
-    if (!clientId) {
-      console.error("clientId nije definisan!");
-      return [];
-    }
-    try {
-      const response = await axios.get(`${backendUrl}/user-ids`, {
-        params: { clientId },
-      });
-      return response.data.map((item) => item.id);
-    } catch (error) {
-      console.error("Greška kod dohvaćanja zahtjeva:", error);
-      return [];
-    }
-  };
 
   const fetchUserRequests = async () => {
     if (!clientId) {
