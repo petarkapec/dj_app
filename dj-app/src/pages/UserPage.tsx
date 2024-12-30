@@ -120,7 +120,7 @@ const UserPage: React.FC = () => {
           q: songQuery,
           type: "video",
           videoCategoryId: 10, // Glazba
-          videoDuration: "medium", // Isključivanje Shorts formata
+          
           key: YOUTUBE_API_KEY,
         },
       });
@@ -212,8 +212,10 @@ const UserPage: React.FC = () => {
 
   return (
     <div className="container">
-      <h1>Pošalji zahtjev DJ-u</h1>
-      <button onClick={fetchUserIds}>test</button>
+      <h1 className="title">
+        <img src="public/feta-logo.jpg" alt="FETA Logo" className="title-icon" />
+          FETA
+      </h1>
 
       {/* Polje za donaciju */}
       <div className="form-group">
@@ -307,6 +309,9 @@ const UserPage: React.FC = () => {
             </div>
             </div>
         ))}
+        </div>
+        <div>
+          <button onClick={() => navigate(`/Help`)}>Detalji</button>
         </div>
 
       

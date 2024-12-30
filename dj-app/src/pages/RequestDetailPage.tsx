@@ -66,12 +66,23 @@ const RequestDetailPage: React.FC = () => {
   }
 
   return (
-    <div className="request-detail">
-      <h1>Detalji zahtjeva</h1>
+    <div>
+    <div className="load-screen">
+        <div>
+        
+      <h2>Detalji zahtjeva</h2>
       <p><b>Pjesma:</b> {request.song_title}</p>
       <p><b>Status:</b> {request.status}</p>
       <p><b>Komentar:</b> {request.comment}</p>
       <p><b>Donacija:</b> {request.donation} EUR</p>
+      </div>
+      {request.status === "pending" && (
+        <div className="load-screen2">
+            <div className="loadersubmit">
+            </div>
+                Pričekajte da DJ prihvati vašu narudžbu...
+        </div>
+      )}
       
       {request.status === "awaiting_payment" && (
         <button className="pay-button" onClick={() => window.open(request.payment_url, "blank")}>
@@ -85,6 +96,7 @@ const RequestDetailPage: React.FC = () => {
       )}
 
       <button onClick={() => navigate("/")}>Povratak</button>
+    </div>
     </div>
   );
 };
