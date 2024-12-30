@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import axios from "axios";
 import "./DJconsole.css";
@@ -8,7 +8,8 @@ import YouTubeThumbnail from "./YouTubeThumbnail";
 interface Request {
   id: number;
   donation: string;
-  song?: { title: string; videoId: string };
+  song_title: string;
+  song_video_id: string;
   comment: string;
   status: string;
   clientId: string;
@@ -77,7 +78,7 @@ const DJConsole = () => {
   
 
   useEffect(() => {
-    const socket = new WebSocket("ws://localhost:3001");
+    const socket = new WebSocket(`${import.meta.env.VITE_WS_URL2}`);
 
     socket.onopen = () => {
       console.log("Connected to WebSocket server");

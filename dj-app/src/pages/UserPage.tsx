@@ -34,7 +34,7 @@ const UserPage: React.FC = () => {
       const response = await axios.get(`${backendUrl}/user-ids`, {
         params: { clientId },
       });
-      const usedIds = response.data.map((item) => item.id);
+      const usedIds = response.data.map((item: any) => item.id);
 
       console.log("Iskorišteni ID-evi:", usedIds);
       return usedIds;
@@ -160,16 +160,14 @@ const UserPage: React.FC = () => {
     if (userids.length === 0) { // Provjerava je li lista prazna
       noviId = 1;
     } else {
-      userids.sort((a, b) => b - a);
+      userids.sort((a: number, b: number) => b - a);
       noviId = userids[0] + 1;
       while (userids.includes(noviId)) { // Ispravljen način provjere prisutnosti
         noviId++;
       }
     }
-
-    // Sort requests by status and date
-    
-
+    console.log(status);
+    console.log(paymentUrl);
 
   
     const requestData = {

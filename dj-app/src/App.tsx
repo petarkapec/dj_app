@@ -1,4 +1,3 @@
-import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import UserPage from "./pages/UserPage";
 import DJConsole from "./pages/DJconsole";

@@ -34,6 +34,9 @@ const API_PORT = process.env.PORT || 5000;
 const WS_PORT_DJ = process.env.WS_PORT_DJ || 3001;
 const WS_PORT_USER = process.env.WS_PORT_USER || 3002;
 
+const DJUSERNAME = process.env.DJUSERNAME || "dj";
+const DJPASSWORD = process.env.DJPASSWORD || "password";
+
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // Express middleware
@@ -308,7 +311,7 @@ app.post("/request", async (req, res) => {
       ],
       mode: "payment",
       success_url: `${process.env.FRONTEND_URL}/`,
-      cancel_url: `${process.env.FRONTEND_URL}/cancel`,
+      cancel_url: `${process.env.FRONTEND_URL}/`,
       metadata: { requestId: request.id },
     });
 
@@ -336,7 +339,7 @@ app.post("/request", async (req, res) => {
 
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
-  if (username === "dj" && password === "password") {
+  if (username === DJUSERNAME && password === DJPASSWORD) {
     const token = jwt.sign({ role: "dj" }, JWT_SECRET, { expiresIn: "1h" });
     return res.json({ token });
   }

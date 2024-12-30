@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const YouTubeThumbnail = ({ songVideoId }) => {
+const YouTubeThumbnail = ({ songVideoId } : any) => {
   const [thumbnailUrl, setThumbnailUrl] = useState(null);
 
   useEffect(() => {

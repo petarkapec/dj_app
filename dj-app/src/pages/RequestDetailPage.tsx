@@ -31,7 +31,7 @@ const RequestDetailPage: React.FC = () => {
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      console.log("reaktivan sam samo jedes govna");
+      console.log("reaktivan sam samo jedes govna", data);
 
       // Ažuriraj status ako je obavijest za trenutni zahtjev
       fetchRequestDetails();
