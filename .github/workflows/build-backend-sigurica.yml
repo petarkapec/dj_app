@@ -50,7 +50,7 @@ jobs:
         with:
           context: ./backend  # Kontekst je 'backend' direktorij
           push: true  # Slanje slike nakon builda
-          tags: ghcr.io/petarkapec/djapp/backend:latest  # Promijeni prema svom registriju
+          tags: ghcr.io/petarkapec/dj_app:latest  # Promijeni prema svom registriju
 
       # 7. Pokreni redeploy putem webhooka
       - name: Trigger redeploy
