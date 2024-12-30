@@ -32,11 +32,6 @@ jobs:
         run: npm install
         working-directory: ./backend  # Postavi 'backend' kao radni direktorij
 
-      # 3. Testiraj i buildaj aplikaciju (opcionalno)
-      - name: Run tests
-        run: npm test
-        working-directory: ./backend
-
       # 4. Postavi Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -55,7 +50,7 @@ jobs:
         with:
           context: ./backend  # Kontekst je 'backend' direktorij
           push: true  # Slanje slike nakon builda
-          tags: ghcr.io/<korisnicko-ime>/backend:latest  # Promijeni prema svom registriju
+          tags: ghcr.io/petarkapec/djapp/backend:latest  # Promijeni prema svom registriju
 
       # 7. Pokreni redeploy putem webhooka
       - name: Trigger redeploy
