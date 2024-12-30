@@ -34,7 +34,6 @@ const UserPage: React.FC = () => {
       const response = await axios.get(`${backendUrl}/user-ids`, {
         params: { clientId },
       });
-      console.log(response);
       const usedIds = response.data.map((item) => item.id);
 
       console.log("Iskorišteni ID-evi:", usedIds);
@@ -155,12 +154,23 @@ const UserPage: React.FC = () => {
     }
 
     let userids = await fetchUserIds();
+    let noviId = 1;
+    console.log(userids);
 
-    userids.sort((a, b) => b - a);
-    let noviId = userids[0] + 1;
-    while (noviId in userids) {
-      noviId++;
+    if (userids.length === 0) { // Provjerava je li lista prazna
+      noviId = 1;
+    } else {
+      userids.sort((a, b) => b - a);
+      noviId = userids[0] + 1;
+      while (userids.includes(noviId)) { // Ispravljen način provjere prisutnosti
+        noviId++;
+      }
     }
+
+    // Sort requests by status and date
+    
+
+
   
     const requestData = {
       clientId,
@@ -172,6 +182,7 @@ const UserPage: React.FC = () => {
       comment,
       noviId
     };
+    console.log(noviId);
 
     try {
       setStatus("loading");
@@ -192,6 +203,15 @@ const UserPage: React.FC = () => {
     }
     
   };
+
+  const sortedUserRequests = [...userRequests].sort((a, b) => {
+    const statusOrder = ["pending", "awaiting_payment", "paid"];
+    const statusComparison = statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
+    if (statusComparison !== 0) return statusComparison;
+
+    // Ako je status isti, sortiraj po ID-u (noviji requestovi imaju veći ID)
+    return b.id - a.id;
+  });
 
   useEffect(() => {
     fetchUserRequests();
@@ -261,7 +281,7 @@ const UserPage: React.FC = () => {
 
       <h2>Tvoji zahtjevi</h2>
       <div className="user-requests">
-        {userRequests.map((r) => (
+        {sortedUserRequests.map((r) => (
           <div key={r.id} className="request-item">
             <p>
               <b>Pjesma:</b> {r.song_title ?? "Nepoznata"} | <b>Status:</b> {r.status}

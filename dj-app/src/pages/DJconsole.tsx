@@ -63,6 +63,17 @@ const DJConsole = () => {
       console.error("Error rejecting request:", error);
     }
   };
+
+  // Sort requests by status and date
+  const sortedRequests = [...requests].sort((a, b) => {
+    const statusOrder = ["pending", "awaiting_payment", "paid"];
+    const statusComparison = statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
+    if (statusComparison !== 0) return statusComparison;
+
+    // Ako je status isti, sortiraj po ID-u (noviji requestovi imaju veći ID)
+    return b.id - a.id;
+  });
+
   
 
   useEffect(() => {
@@ -105,7 +116,7 @@ const DJConsole = () => {
         <img src="public/feta-logo.jpg" alt="FETA Logo" className="title-icon" />
           FETA
       </h1>
-      {requests.map((r) => (
+      {sortedRequests.map((r) => (
         <div className="request-card" key={r.id}>
           <div>
             <YouTubeThumbnail songVideoId={r.song_video_id} />
