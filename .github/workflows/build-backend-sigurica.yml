@@ -3,6 +3,7 @@ name: Build and Push Backend Image
 on:
   push:
     branches:
+      - main
       - sigurica  # Pokreni workflow samo na promjene u 'master' grani
     paths:
       - 'backend/**'  # Pokreni samo ako su promjene u 'backend' direktoriju
