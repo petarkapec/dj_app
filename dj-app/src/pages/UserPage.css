@@ -1,82 +1,180 @@
-/* Ostatak koda je isti kao prije */
+/* General container styling */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Form styling */
+.form-group {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+/* Search container styling */
+.search-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.search-container input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.search-container button {
+  padding: 10px;
+  background-color: #00e6ff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: larger;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+}
+
+
+.search-container button:hover {
+  background-color: #00e6ff;
+}
+
+/* Results container styling */
+.results {
+  width: 100%;
+}
 
 .result-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-  }
-  
-  .result-item.selected {
-    background-color: #d4edda; /* Svijetlo zelena za odabranu pjesmu */
-    border-color: #28a745;
-  }
-  
-  .result-item img {
-    width: 60px;
-    height: 45px;
-    border-radius: 5px;
-  }
-  
-  .song-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-  }
-  
-  .song-info p {
-    margin: 0;
-    font-weight: bold;
-  }
-  
-  .song-info button {
-    padding: 5px 10px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .song-info button:hover {
-    background-color: #0056b3;
-  }
-  
-  .send-button {
-    width: 100%;
-    background-color: #28a745;
-  }
-  
-  .send-button:hover {
-    background-color: #218838;
-  }
-  
-  .pay-button {
-    background-color: #28a745;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    cursor: pointer;
-    margin-right: 10px;
-  }
-  
-  .pay-button:hover {
-    background-color: #218838;
-  }
-  
-  .cancel-button {
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    cursor: pointer;
-  }
-  
-  .cancel-button:hover {
-    background-color: #c82333;
-  }
-  
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.result-item img.result-image {
+  width: 50px;
+  height: 50px;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+
+.result-item p.result-title {
+  font-size: 0.9rem;
+  margin: 0 10px;
+  flex-grow: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.result-item button.result-button {
+  font-size: 0.8rem;
+  padding: 5px 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+
+.result-item button.result-button:hover {
+  background-color: #0056b3;
+}
+
+/* Submit button styling */
+.send-button {
+  width: 100%;
+  background-color: #28a745;
+  padding: 10px;
+  color: white;
+  border: none;
+  border-radius: 5px;
+}
+
+.send-button:hover {
+  background-color: #218838;
+}
+
+/* User requests styling */
+.user-requests {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.request-item {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.request-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pay-button,
+.cancel-button {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.pay-button {
+  background-color: #28a745;
+}
+
+.pay-button:hover {
+  background-color: #218838;
+}
+
+.cancel-button {
+  background-color: #dc3545;
+}
+
+.cancel-button:hover {
+  background-color: #c82333;
+}
+
+.title {
+  font-size: 4rem;
+  margin-bottom: 2rem;
+  color: #00e6ff; /* Tirkizno plava boja loga */
+}
+
+.title-icon {
+  width: 90px;
+  height: 40px;
+  margin-right: 10px;
+}

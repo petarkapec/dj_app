@@ -1,30 +1,45 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./UserPage.css";
-
+import { useNavigate } from "react-router-dom";
 const YOUTUBE_API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
-const wsUrl = import.meta.env.VITE_WS_URL; // URL za WebSocket (npr. ws://localhost:3001)
+const wsUrl = import.meta.env.VITE_WS_URL;
 
 const UserPage: React.FC = () => {
-  const [donation, setDonation] = useState(""); // Polje za donaciju
-  const [songQuery, setSongQuery] = useState(""); // Polje za upit
-  const [comment, setComment] = useState(""); // Dodatni komentar
-  const [searchResults, setSearchResults] = useState<any[]>([]); // Rezultati pretraživanja
-  const [selectedSong, setSelectedSong] = useState<any>(null); // Odabrana pjesma
+  const [donation, setDonation] = useState("");
+  const [songQuery, setSongQuery] = useState("");
+  const [comment, setComment] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [selectedSong, setSelectedSong] = useState<any>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "submitted" | "error">("idle");
-  const [paymentUrl, setPaymentUrl] = useState<string | null>(null); // Stripe URL
-  const [userRequests, setUserRequests] = useState<any[]>([]); // Povijest zahtjeva
+  const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
+  const [userRequests, setUserRequests] = useState<any[]>([]);
   const clientId = localStorage.getItem("clientId") || generateClientId();
+  const navigate = useNavigate();
 
-  // Generiraj i spremi jedinstveni identifikator
   function generateClientId() {
     const newClientId = `client_${Math.random().toString(36).substring(2, 15)}`;
     localStorage.setItem("clientId", newClientId);
     return newClientId;
   }
 
-  // Dohvati povijest zahtjeva
+  const fetchUserIds = async () => {
+    if (!clientId) {
+      console.error("clientId nije definisan!");
+      return [];
+    }
+    try {
+      const response = await axios.get(`${backendUrl}/user-ids`, {
+        params: { clientId },
+      });
+      return response.data.map((item) => item.id);
+    } catch (error) {
+      console.error("Greška kod dohvaćanja zahtjeva:", error);
+      return [];
+    }
+  };
+
   const fetchUserRequests = async () => {
     if (!clientId) {
       console.error("clientId nije definisan!");
@@ -41,7 +56,6 @@ const UserPage: React.FC = () => {
     }
   };
 
-  // Povezivanje na WebSocket
   useEffect(() => {
     const ws = new WebSocket(`${wsUrl}?clientId=${clientId}`);
 
@@ -51,8 +65,6 @@ const UserPage: React.FC = () => {
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
-
-      // Ažuriranje statusa zahtjeva u stvarnom vremenu
       fetchUserRequests();
       if (data.type === "status_update" && data.clientId === clientId) {
         setUserRequests((prevRequests) =>
@@ -61,9 +73,12 @@ const UserPage: React.FC = () => {
           )
         );
 
-        // Ako je korisnik trenutno čeka Stripe URL, ažuriraj ga
         if (data.status === "awaiting_payment" && data.paymentUrl) {
           setPaymentUrl(data.paymentUrl);
+        }
+
+        if (data.status === "rejected") {
+          alert("DJ je izbrisao tvoj zahtjev");
         }
       }
     };
@@ -81,10 +96,9 @@ const UserPage: React.FC = () => {
     };
   }, [clientId]);
 
-  // Pretraživanje YouTube pjesama
   const searchYouTube = async () => {
     if (!songQuery) return;
-  
+
     try {
       const response = await axios.get(`https://www.googleapis.com/youtube/v3/search`, {
         params: {
@@ -92,29 +106,25 @@ const UserPage: React.FC = () => {
           maxResults: 5,
           q: songQuery,
           type: "video",
-          videoCategoryId: 10, // Glazba
-          videoDuration: "medium", // Isključivanje Shorts formata
+          videoCategoryId: 10,
           key: YOUTUBE_API_KEY,
         },
       });
-  
-      setSearchResults(response.data.items); // Postavi rezultate pretraživanja
-      setSelectedSong(null); // Resetiraj prethodno odabranu pjesmu
+
+      setSearchResults(response.data.items);
+      setSelectedSong(null);
     } catch (error) {
       console.error("Greška kod pretraživanja YouTube API-ja:", error);
     }
   };
-  
-  
 
   const cancelRequest = async (requestId: string) => {
     try {
       const response = await axios.delete(`${backendUrl}/cancel-request`, {
         data: { clientId, requestId },
       });
-  
+
       if (response.status === 200) {
-        // Uspješno obrisano, ažuriraj prikaz zahtjeva
         setUserRequests((prevRequests) =>
           prevRequests.filter((req) => req.id !== requestId)
         );
@@ -127,18 +137,16 @@ const UserPage: React.FC = () => {
       alert("Došlo je do greške pri prekidu zahtjeva.");
     }
   };
-  
 
-
-
-
-  // Slanje zahtjeva
   const handleSubmit = async () => {
     if (!donation || !selectedSong) {
       alert("Molimo unesite donaciju i odaberite pjesmu!");
       return;
     }
-  
+
+    const userids = await fetchUserIds();
+    const noviId = Math.max(...userids, 0) + 1;
+
     const requestData = {
       clientId,
       donation,
@@ -146,17 +154,19 @@ const UserPage: React.FC = () => {
         title: selectedSong.snippet.title,
         videoId: selectedSong.id.videoId,
       },
-      comment
+      comment,
+      noviId,
     };
-  
+
     try {
       setStatus("loading");
       const response = await axios.post(`${backendUrl}/request`, requestData);
-  
+
       if (response.status === 200) {
         setStatus("submitted");
-        setPaymentUrl(response.data.paymentUrl); // Postavi payment URL
-        fetchUserRequests(); // Osvježi listu zahtjeva
+        setPaymentUrl(response.data.paymentUrl);
+        fetchUserRequests();
+        navigate(`/requests/${noviId}`);
       } else {
         throw new Error("Zahtjev nije uspješno poslan");
       }
@@ -165,17 +175,19 @@ const UserPage: React.FC = () => {
       setStatus("error");
     }
   };
-  
 
   useEffect(() => {
-    fetchUserRequests(); // Dohvati povijest zahtjeva na učitavanje stranice
+    fetchUserRequests();
   }, []);
 
   return (
     <div className="container">
-      <h1>Pošalji zahtjev DJ-u</h1>
+      <h1 className="title">
+        <img src="public/feta-logo.jpg" alt="FETA Logo" className="title-icon" />
+        FETA
+      </h1>
+      <h2>Pošalji zahtjev DJ-u</h2>
 
-      {/* Polje za donaciju */}
       <div className="form-group">
         <label>Prijedlog donacije:</label>
         <input
@@ -186,7 +198,6 @@ const UserPage: React.FC = () => {
         />
       </div>
 
-      {/* Polje za pretraživanje pjesme */}
       <div className="form-group">
         <label>Pretraži pjesmu:</label>
         <div className="search-container">
@@ -200,7 +211,6 @@ const UserPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Prikaz rezultata pretraživanja */}
       <div className="results">
         {searchResults.map((video) => (
           <div
@@ -208,19 +218,17 @@ const UserPage: React.FC = () => {
             className={`result-item ${
               selectedSong?.id.videoId === video.id.videoId ? "selected" : ""
             }`}
+            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "5px" }}
           >
-            <img src={video.snippet.thumbnails.default.url} alt={video.snippet.title} />
-            <div className="song-info">
-              <p>{video.snippet.title}</p>
-              <button onClick={() => setSelectedSong(video)}>
-                {selectedSong?.id.videoId === video.id.videoId ? "Odabrano" : "Odaberi"}
-              </button>
-            </div>
+            <img src={video.snippet.thumbnails.default.url} alt={video.snippet.title} style={{ width: "50px", height: "50px", borderRadius: "5px" }} />
+            <p style={{ fontSize: "0.8rem", margin: "0 10px", flex: "1" }}>{video.snippet.title}</p>
+            <button style={{ fontSize: "0.7rem", padding: "5px" }} onClick={() => setSelectedSong(video)}>
+              {selectedSong?.id.videoId === video.id.videoId ? "Odabrano" : "Odaberi"}
+            </button>
           </div>
         ))}
       </div>
 
-      {/* Polje za dodatni komentar */}
       <div className="form-group">
         <label>Dodatni komentar (opcionalno):</label>
         <textarea
@@ -234,44 +242,37 @@ const UserPage: React.FC = () => {
         Pošalji zahtjev
       </button>
 
-
-      
-
-      {/* Prikaz povijesti zahtjeva */}
       <h2>Tvoji zahtjevi</h2>
       <div className="user-requests">
         {userRequests.map((r) => (
-            <div key={r.id} className="request-item">
+          <div key={r.id} className="request-item">
             <p>
-                <b>Pjesma:</b> {r.song_title ?? "Nepoznata"} | <b>Status:</b> {r.status}
+              <b>Pjesma:</b> {r.song_title ?? "Nepoznata"} | <b>Status:</b> {r.status}
             </p>
-            {/* Gumbi za akcije */}
             <div className="request-actions">
-                {r.status === "awaiting_payment" && (
+              <button onClick={() => navigate(`/requests/${r.id}`)}>Detalji</button>
+              {r.status === "awaiting_payment" && (
                 <button
-                    className="pay-button"
-                    onClick={() => window.open(r.payment_url, "blank")}
+                  className="pay-button"
+                  onClick={() => window.open(r.payment_url, "blank")}
                 >
-                    Plati
+                  Plati
                 </button>
-                )}
-                {r.status === "awaiting_payment" && (
+              )}
+              {r.status === "awaiting_payment" && (
                 <button
-                    className="cancel-button"
-                    onClick={() => cancelRequest(r.id)}
+                  className="cancel-button"
+                  onClick={() => cancelRequest(r.id)}
                 >
-                    Prekini
+                  Prekini
                 </button>
-                )}
+              )}
             </div>
-            </div>
+          </div>
         ))}
-        </div>
-
-      
+      </div>
     </div>
   );
 };
-
 
 export default UserPage;
