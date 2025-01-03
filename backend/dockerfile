@@ -1,0 +1,17 @@
+FROM node:18
+
+# Postavi radni direktorij
+WORKDIR /app
+
+# Kopiraj package.json i instaliraj ovisnosti
+COPY package*.json ./
+RUN npm install
+
+# Kopiraj cijeli backend projekt
+COPY . .
+
+# Expose port
+EXPOSE 5000
+
+# Pokreni backend aplikaciju
+CMD ["node", "app.js"]

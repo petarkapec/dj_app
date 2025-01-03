@@ -34,6 +34,9 @@ const API_PORT = process.env.PORT || 5000;
 const WS_PORT_DJ = process.env.WS_PORT_DJ || 3001;
 const WS_PORT_USER = process.env.WS_PORT_USER || 3002;
 
+const DJUSERNAME = process.env.DJUSERNAME || "dj";
+const DJPASSWORD = process.env.DJPASSWORD || "password";
+
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // Express middleware
@@ -86,6 +89,8 @@ wssUser.on("connection", (ws) => {
 
 
 
+
+
 // Ruta za Stripe webhook (mora koristiti `bodyParser.raw`)
 app.post(
   "/stripe-webhook",
@@ -93,9 +98,6 @@ app.post(
   async (req, res) => {
     const sig = req.headers["stripe-signature"];
     let event;
-    console.log("Webhook payload:", req.body); // Dodajte ispis payloada
-    console.log("Webhook signature:", sig);
-
     try {
       
 
@@ -135,6 +137,22 @@ app.post(
     res.json({ received: true });
   }
 );
+
+app.get("/user-ids", async (req, res) => {
+  const { clientId } = req.query;
+  if (!clientId) {
+    return res.status(400).json({ message: "clientId is required" });
+  }
+
+  try {
+    const result = await pool.query("SELECT r.id FROM requests r WHERE r.client_id = $1", [clientId]);
+    res.json(result.rows);
+    console.log(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching user requests" });
+  }
+});;
 
 
 // Endpoints za zahtjeve
@@ -183,10 +201,28 @@ app.get("/user-requests", async (req, res) => {
   }
 });
 
+
+app.get("/requests/:requestId", async (req, res) => {
+  const { requestId } = req.params;
+
+  try {
+    const result = await pool.query("SELECT * FROM requests WHERE id = $1", [requestId]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Request not found" });
+    }
+
+    res.json(result.rows[0]); // Vraćamo samo prvi (i jedini) redak
+  } catch (error) {
+    console.error("Error fetching specific request:", error);
+    res.status(500).json({ message: "Error fetching the request" });
+  }
+});
+
+
 app.get("/requests", async (req, res) => {
   try {
     const result = await pool.query("SELECT r.* FROM requests r");
-    console.log(result.rows);
     res.json(result.rows);
   } catch (error) {
     console.error(error);
@@ -194,8 +230,10 @@ app.get("/requests", async (req, res) => {
   }
 });
 
+
 app.delete("/cancel-request", async (req, res) => {
   const { clientId, requestId } = req.body;
+  console.log(requestId, "stiso prvi");
 
   try {
     await pool.query("DELETE FROM requests WHERE id = $1 AND client_id = $2", [requestId, clientId]);
@@ -219,13 +257,40 @@ app.delete("/cancel-request", async (req, res) => {
   }
 });
 
+app.delete("/delete-request", async (req, res) => {
+  const { id } = req.body;
+  console.log(id, "stiso drugi");
+
+  try {
+    await pool.query("DELETE FROM requests WHERE id = $1", [id]);
+
+    wssUser.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(
+          JSON.stringify({
+            type: "request_cancelled",
+            clientId,
+            requestId,
+          })
+        );
+      }
+    });
+
+    res.status(200).send({ message: "Zahtjev je uspješno prekinut." });
+  } catch (error) {
+    console.error("Greška pri prekidu zahtjeva:", error);
+    res.status(500).send({ error: "Došlo je do greške pri prekidu zahtjeva." });
+  }
+});
+
+
 app.post("/request", async (req, res) => {
-  const { donation, song, comment, clientId } = req.body;
+  const { donation, song, comment, clientId, noviId } = req.body;
 
   try {
     const result = await pool.query(
-      "INSERT INTO requests (donation, status, song_title, song_video_id, comment, client_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-      [donation, "pending", song.title, song.videoId, comment, clientId]
+      "INSERT INTO requests (donation, status, song_title, song_video_id, comment, client_id, id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+      [donation, "pending", song.title, song.videoId, comment, clientId, noviId]
     );
 
     const request = result.rows[0];
@@ -246,7 +311,7 @@ app.post("/request", async (req, res) => {
       ],
       mode: "payment",
       success_url: `${process.env.FRONTEND_URL}/`,
-      cancel_url: `${process.env.FRONTEND_URL}/cancel`,
+      cancel_url: `${process.env.FRONTEND_URL}/`,
       metadata: { requestId: request.id },
     });
 
@@ -274,7 +339,7 @@ app.post("/request", async (req, res) => {
 
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
-  if (username === "dj" && password === "password") {
+  if (username === DJUSERNAME && password === DJPASSWORD) {
     const token = jwt.sign({ role: "dj" }, JWT_SECRET, { expiresIn: "1h" });
     return res.json({ token });
   }

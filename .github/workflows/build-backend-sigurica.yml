@@ -1,0 +1,58 @@
+name: Build and Push Backend Image
+
+on:
+  push:
+    branches:
+      - sigurica  # Pokreni workflow samo na promjene u 'master' grani
+    paths:
+      - 'backend/**'  # Pokreni samo ako su promjene u 'backend' direktoriju
+  workflow_dispatch:  # Omogući ručno pokretanje workflow-a
+
+jobs:
+  build-and-push-backend:
+    name: Build and Push Backend
+    runs-on: ubuntu-latest
+    env:
+      BACKEND_DEPLOY_HOOK: ${{ secrets.BACKEND_DEPLOY_HOOK }}
+
+    steps:
+      # 1. Checkout repozitorij
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+
+      # 2. Postavi Node.js verziju i instaliraj ovisnosti
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'  # Keširanje npm ovisnosti
+          cache-dependency-path: 'backend/package-lock.json'
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./backend  # Postavi 'backend' kao radni direktorij
+
+      # 4. Postavi Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 5. Logiraj se u Docker registry
+      - name: Login to container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io  # Promijeni ako koristiš drugi registry, npr. Docker Hub
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # 6. Build i push Docker sliku
+      - name: Build and push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend  # Kontekst je 'backend' direktorij
+          push: true  # Slanje slike nakon builda
+          tags: ghcr.io/petarkapec/dj_app:latest  # Promijeni prema svom registriju
+
+      # 7. Pokreni redeploy putem webhooka
+      - name: Trigger redeploy
+        if: ${{ env.BACKEND_DEPLOY_HOOK }}  # Samo ako postoji BACKEND_DEPLOY_HOOK
+        run: curl -X POST ${{ env.BACKEND_DEPLOY_HOOK }}
