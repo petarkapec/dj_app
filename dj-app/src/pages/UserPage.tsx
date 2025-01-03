@@ -149,7 +149,7 @@ const UserPage: React.FC = () => {
 
   const handleSubmit = async () => {
     if (!donation || !selectedSong) {
-      console.log(backendUrl, wsUrl, YOUTUBE_API_KEY);
+      console.log("proradio i ovo su sifre: ",backendUrl, wsUrl, YOUTUBE_API_KEY);
       alert("Molimo unesite donaciju i odaberite pjesmu!");
       return;
     }
