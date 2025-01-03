@@ -149,7 +149,7 @@ const UserPage: React.FC = () => {
 
   const handleSubmit = async () => {
     if (!donation || !selectedSong) {
-      alert("Molimo unesite donaciju i odaberite pjesmu!");
+      alert("Molimo unesite donaciju i odaberite pjesmu mjau!");
       return;
     }
 
